@@ -1,0 +1,5 @@
+[nemesis]
+version=0.1.0-alpha
+type=execute
+path=NEMESIS.sh
+
