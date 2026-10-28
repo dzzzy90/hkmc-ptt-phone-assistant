@@ -1,0 +1,21 @@
+{
+  "method": "Lcom/hkmc/micom/ModeKeyDispatcher;->interceptPttKey()V",
+  "delay_offset": 1289088,
+  "checksum_offset": 48,
+  "size": 4921208,
+  "original_md5": "23e123f1cc296943b32391a70b2f20f5",
+  "patched_md5": "06f7715af79e839861e8b60a9201a99c",
+  "original_sha256": "3cf40fb00854c63afa49abea1dad18a0afcbc0dd68b17de9ed7ea3f5aeab4222",
+  "patched_sha256": "772272ddb93076f0d9eaf0bbe9f39c74cd5096bb09de916137242694343aa8db",
+  "old_delay_ms": 500,
+  "new_delay_ms": 0,
+  "code_offset": 1289040,
+  "changed_offsets": [
+    48,
+    49,
+    50,
+    51,
+    1289088,
+    1289089
+  ]
+}
