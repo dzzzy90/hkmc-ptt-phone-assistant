@@ -12,6 +12,12 @@ Implementation: `ModeKeyDispatcher.interceptPttKey()` posts `mPttLongPress` usin
 updates the optimized DEX Adler-32 checksum. It does not replace the routing code.
 Only six file bytes change: the two-byte delay and four checksum bytes.
 
+## Download
+
+**[Download v0.1.0-alpha — installable ZIP](https://github.com/dzzzy90/hkmc-ptt-phone-assistant/releases/download/v0.1.0-alpha/hkmc-ptt-phone-assistant-0.1.0-alpha-release.zip)**
+
+Includes the installer, recovery USB files, and source. Read the compatibility and installation instructions below before installing.
+
 ## Before installation
 
 This replaces one core infotainment framework file. An incompatible change can prevent
