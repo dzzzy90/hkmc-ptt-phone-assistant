@@ -1,0 +1,14 @@
+[nemesis]
+id=hkmc.ptt-phone-assistant
+name=Phone Assistant PTT - Ioniq 5 US 260507 ALPHA
+version=0.1.0-alpha
+types=application
+preinstall=scripts/preinstall.sh
+postinstall=scripts/install.sh
+preuninstall=scripts/uninstall.sh
+
+[app.0]
+kind=sh
+path=bin/status.sh
+uid=root
+
