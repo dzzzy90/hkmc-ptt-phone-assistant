@@ -1,32 +1,16 @@
 # Phone Assistant PTT — 0.1.0-alpha
 
-Experimental NEMESIS package for the supplied 2022 Ioniq 5 Limited USA firmware,
-`NEEV23.USA.S5W_M.V015.012.260507`. **Owner-tested on one vehicle; experimental alpha release.**
-
-## Vehicle test report
-
-The owner reports that this package works on a 2022 Ioniq 5 Limited USA with
-`NEEV23.USA.S5W_M.V015.012.260507`. The report does not separately identify
-CarPlay versus Android Auto or confirm every test below. Compatibility with
-other vehicles or firmware has not been established.
+NEMESIS package for Gen5W `NEEV23.USA.S5W_M.V015.012.260507` tested on 2022 Ioniq 5 Limited USA firmware.
 
 ## Intended behavior
 
-A short voice-button press enters Hyundai's existing long-press path immediately.
-A held press enters that same path without waiting half a second. The connected
-projection session determines Siri versus the Android Auto assistant. Existing
-call, camera, voice-memo and connection-state handling remains in the firmware.
+Default behavior for steering wheel voice button short press activates Hyundai/Kia's built in voice assistant. This package reroutes the steering wheel voice button short press to activate phone projection voice assistant (Siri or Google).
 This does not add projection connectivity or force an assistant when none is connected.
 
 Implementation: `ModeKeyDispatcher.interceptPttKey()` posts `mPttLongPress` using
 `Handler.postDelayed(..., 500)`. This patch changes only that delay to zero and
 updates the optimized DEX Adler-32 checksum. It does not replace the routing code.
 Only six file bytes change: the two-byte delay and four checksum bytes.
-
-**Limitations:** a zero-delay Handler callback is queued, not synchronous. Very
-fast taps or a busy handler may still race with key-up cancellation. Avoiding
-duplicate activation, release behavior, active-assistant behavior, and both
-projection platforms require in-car testing. These are not claimed as verified.
 
 ## Before installation
 
