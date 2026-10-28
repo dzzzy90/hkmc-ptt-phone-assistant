@@ -1,0 +1,34 @@
+Version: 0.1.0-alpha
+Vehicle testing: owner reports successful operation on 2022 Ioniq 5 Limited USA
+Firmware: NEEV23.USA.S5W_M.V015.012.260507
+Individual projection platforms and full test checklist: not separately confirmed
+
+Passed against the original uploaded ODEX, using a simulated filesystem and
+mocked getprop, nemesis remount and chown commands:
+- install and exact patched-byte comparison
+- original backup retained and verified
+- repeat install is idempotent
+- package status
+- uninstall restores original bytes
+- repeat uninstall is idempotent
+- unsupported firmware and wrong device rejected
+- corrupted patch payload leaves live file unchanged
+- corrupt backup rejected without overwriting it
+- patched file without backup rejected
+- remount failure leaves original intact
+- later firmware changes block uninstall restoration
+- independent USB recovery restores the verified original
+
+Additional completed checks:
+- shell syntax
+- six changed bytes only (two-byte delay and four-byte checksum)
+- patched ODEX decoded with Baksmali 2.5.2, API 18 layout, original dependencies
+- decoding returned exit 0 and no stderr
+- decoded ModeKeyDispatcher differs only at the 500 -> 0 delay constant
+- DEX checksum matches modified bytes
+- ODEX dependency and optimization sections unchanged
+- original optimized-DEX signature preserved
+
+The automated checks alone do not establish vehicle behavior. The owner reports
+successful operation; callback edge cases, both projection platforms, and
+vehicle recovery/uninstall remain without separate confirmation.
