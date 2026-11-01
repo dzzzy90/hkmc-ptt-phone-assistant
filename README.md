@@ -1,6 +1,9 @@
 # Phone Assistant PTT — 0.1.0-alpha
 
-NEMESIS package for Gen5W `NEEV23.USA.S5W_M.V015.012.260507` tested on 2022 Ioniq 5 Limited USA firmware.
+NEMESIS package for Gen5W `NEEV23.USA.S5W_M.V015.012.260507` tested on 2022 Ioniq 5 Limited USA firmware,
+and for `CVEV.USA.0000.V015.012.260507` tested on a Kia EV6, where the installer selects the
+`ev6-cvev-us-260507` profile and the owner reports the short press now activates the phone projection
+assistant.
 
 ## Intended behavior
 
@@ -28,7 +31,13 @@ NEMESIS's USB handler to remain functional; it is not a guaranteed boot recovery
 The installer rejects any framework file other than the exact original supplied
 for this release or this release's exact patched version. Matching the software
 version label alone is insufficient. Do not bypass the checks for another car or
-firmware. Do not install another package modifying this file while this alpha is
+firmware.
+
+Two inspected framework builds are accepted, each selected by the exact MD5 of the live
+file: `ioniq5-neev-us-260507` (`ro.product.device` `wp_daudioplus_neev_us`) and
+`ev6-cvev-us-260507` (`wp_daudioplus_cvev_us`). Both are 260507 Gen5W builds, and the
+bytes this package changes are identical in both. The installer logs the profile it
+selected, and every refusal names the MD5 it saw. Do not install another package modifying this file while this alpha is
 installed. Uninstall this alpha before updating firmware.
 
 ## Install
@@ -87,7 +96,7 @@ No personal data or general system logs are collected.
 - The ODEX source signature already does not match its optimized DEX code. That
   original signature is retained for dependency identity; the code checksum is
   recalculated. Dependency/optimization sections are untouched.
-- Full hashes and exact offsets are in `package/patch/manifest.json`.
+- Full hashes and exact offsets are in the selected profile's `package/patch/<framework-profile>/manifest.json`.
 
 No Hyundai/Kia framework binaries or decompiled source are shipped. The package
 contains our scripts and six replacement bytes only. The original is copied and

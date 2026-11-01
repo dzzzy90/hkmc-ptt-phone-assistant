@@ -15,7 +15,7 @@ with zipfile.ZipFile(OUT,'w',zipfile.ZIP_DEFLATED) as z:
     for f in sorted((ROOT/'recovery').iterdir()):z.write(f,'RECOVERY-USB/'+f.name)
     z.write(ROOT/'package/scripts/common.sh','RECOVERY-USB/recovery-common.sh')
     for f in sorted(ROOT.rglob('*')):
-        if f.is_file() and '__pycache__' not in f.parts:
+        if f.is_file() and '__pycache__' not in f.parts and '.scratch' not in f.parts:
             z.write(f,'SOURCE/'+f.relative_to(ROOT).as_posix())
     for n in ['README.md','VALIDATION.txt','LICENSE']:z.write(ROOT/n,n)
 with zipfile.ZipFile(OUT) as z:
@@ -25,5 +25,7 @@ with zipfile.ZipFile(OUT) as z:
     with zipfile.ZipFile(io.BytesIO(z.read('INSTALL-USB/packages/hkmc.ptt-phone-assistant.nemesis.zip'))) as inner:
         assert inner.testzip() is None
         assert 'NEMESIS.data' in inner.namelist()
-        assert inner.read('patch/delay.bin')==b'\0\0'
+        for profile in ('ioniq5-neev-us-260507','ev6-cvev-us-260507'):
+            assert inner.read(f'patch/{profile}/delay.bin')==b'\0\0'
+            assert len(inner.read(f'patch/{profile}/checksum.bin'))==4
 print(OUT)
