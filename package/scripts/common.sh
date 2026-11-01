@@ -7,10 +7,38 @@ STATE=/data/nemesis/backup/hkmc.ptt-phone-assistant
 BACKUP=$STATE/automotive-service.odex
 LOCK=/data/nemesis/hkmc.ptt-phone-assistant.lock
 LOG=/data/nemesis/hkmc.ptt-phone-assistant.log
-ORIGINAL_MD5=23e123f1cc296943b32391a70b2f20f5
-PATCHED_MD5=06f7715af79e839861e8b60a9201a99c
-DELAY_OFFSET=1289088
-CHECKSUM_OFFSET=48
+# Supported framework profiles: each one is an inspected framework build, not a
+# version label. The live file's MD5 selects a profile; nothing else can. The four
+# numbers per profile are copied from that profile's patch/<profile>/values.sh, which
+# src/make_patch.py generates - add a profile by inspecting a build, never by
+# relaxing a match. DEVICES lists the ro.product.device each profile was observed on.
+PROFILE=
+DEVICES=
+ORIGINAL_MD5=
+PATCHED_MD5=
+DELAY_OFFSET=
+CHECKSUM_OFFSET=
+profile_select() {
+    PROFILE=
+    case "$1" in
+        23e123f1cc296943b32391a70b2f20f5|06f7715af79e839861e8b60a9201a99c)
+            PROFILE=ioniq5-neev-us-260507
+            ORIGINAL_MD5=23e123f1cc296943b32391a70b2f20f5
+            PATCHED_MD5=06f7715af79e839861e8b60a9201a99c
+            DELAY_OFFSET=1289088
+            CHECKSUM_OFFSET=48
+            DEVICES='wp_daudioplus_neev_us' ;;
+        33a30843e149a3d604ecc6957fd25d46|2aba74f292f190a4fa8bef94c828b61d)
+            PROFILE=ev6-cvev-us-260507
+            ORIGINAL_MD5=33a30843e149a3d604ecc6957fd25d46
+            PATCHED_MD5=2aba74f292f190a4fa8bef94c828b61d
+            DELAY_OFFSET=1289088
+            CHECKSUM_OFFSET=48
+            DEVICES='wp_daudioplus_cvev_us' ;;
+        *) DEVICES= ;;
+    esac
+    [ -n "$PROFILE" ]
+}
 
 log() { echo "$*"; echo "$*" >> "$LOG"; }
 die() { log "ERROR: $*"; exit 1; }
@@ -24,16 +52,19 @@ digest() {
     echo "$1"
 }
 check_device() {
-    [ "$(getprop ro.product.device)" = wp_daudioplus_neev_us ] || die 'Unsupported head unit.'
+    [ -n "$PROFILE" ] || die 'No framework profile selected; run the framework check first.'
+    device=$(getprop ro.product.device)
+    case " $DEVICES " in
+      *" $device "*) ;;
+      *) die "Unsupported head unit for framework profile $PROFILE." ;;
+    esac
     [ "$(getprop ro.build.version.sdk)" = 19 ] || die 'Unsupported Android version.'
     command -v md5 >/dev/null 2>&1 || die 'Required Android md5 command is missing.'
 }
 check_live() {
     current=$(digest "$LIVE") || die 'Cannot checksum live framework.'
-    case "$current" in
-      "$ORIGINAL_MD5"|"$PATCHED_MD5") ;;
-      *) die "Framework differs from supported file; no change made. MD5=$current" ;;
-    esac
+    profile_select "$current" || die "Framework differs from supported file; no change made. MD5=$current"
+    log "Framework profile: $PROFILE"
 }
 check_backup() {
     [ ! -L "$STATE" ] || die 'Backup directory is a symlink.'

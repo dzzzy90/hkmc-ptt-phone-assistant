@@ -2,6 +2,14 @@ Version: 0.1.0-alpha
 Vehicle testing: owner reports successful operation on 2022 Ioniq 5 Limited USA
 Firmware: NEEV23.USA.S5W_M.V015.012.260507
 Individual projection platforms and full test checklist: not separately confirmed
+Vehicle testing: Kia EV6 CVEV.USA.0000.V015.012.260507 (ro.product.device wp_daudioplus_cvev_us).
+Every automated case above also passes with that car's automotive-service.odex (sha256
+8af745b41aa28f49…) supplied as the fixture, selecting profile ev6-cvev-us-260507. On car
+2026-10-31 the package installed with profile ev6-cvev-us-260507 selected: remount rw ok,
+the 2-byte and 4-byte writes applied, post-write verification passed, no automatic reboot. After a
+full head-unit restart the owner reports the short press activates the phone projection assistant
+and long press behaviour is unchanged. Uninstall round-trip and per-platform projection checks were
+not separately re-confirmed on this car.
 
 Passed against the original uploaded ODEX, using a simulated filesystem and
 mocked getprop, nemesis remount and chown commands:
@@ -12,6 +20,8 @@ mocked getprop, nemesis remount and chown commands:
 - uninstall restores original bytes
 - repeat uninstall is idempotent
 - unsupported firmware and wrong device rejected
+- framework profile selection logged; a device belonging to another profile refused
+- profile table verified against each profile's generated payload bytes
 - corrupted patch payload leaves live file unchanged
 - corrupt backup rejected without overwriting it
 - patched file without backup rejected
@@ -28,6 +38,19 @@ Additional completed checks:
 - DEX checksum matches modified bytes
 - ODEX dependency and optimization sections unchanged
 - original optimized-DEX signature preserved
+
+Checks run for the ev6-cvev-us-260507 payload, independent of the shipping tool:
+- applying the shipped payload bytes to that car's ODEX reproduces the profile's
+  patched_md5 2aba74f292f190a4fa8bef94c828b61d and exactly six changed offsets
+  (48, 49, 50, 51, 1289088, 1289089); file size unchanged
+- the installed file's stored DEX Adler-32 equals Adler-32 recomputed over that file's
+  dex[12:dexlen] (0xf361a95d), so the framework checksum is self-consistent after install
+- baksmali 2.5.2-dev, API 18 layout, original dependencies: stock and installed DEX both
+  disassemble with exit 0, no warnings, 1068 classes each
+- the whole-framework smali differs in exactly one line, inside
+  .method private interceptPttKey()V of Lcom/hkmc/micom/ModeKeyDispatcher;:
+  const-wide/16 v2, 0x1f4 -> const-wide/16 v2, 0x0
+- the other delay constant in that class (0x3e8) is untouched
 
 The automated checks alone do not establish vehicle behavior. The owner reports
 successful operation; callback edge cases, both projection platforms, and
