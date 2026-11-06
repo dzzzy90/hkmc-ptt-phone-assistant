@@ -1,0 +1,95 @@
+name: HMG-API package
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['hmgapi-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: VysseCodes/HMG-API
+          ref: 180185de2c57afb2cca4858d0be7828e8f1051d6
+          path: upstream-hmgapi
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile signer and create disposable CI identity
+        run: |
+          mkdir -p "$RUNNER_TEMP/classes"
+          javac --release 8 -d "$RUNNER_TEMP/classes" upstream-hmgapi/core/runtime/java/hmgapi/engine/*.java
+          java -cp "$RUNNER_TEMP/classes" hmgapi.engine.Signing keygen "$RUNNER_TEMP/ci.key"
+      - name: Build and check package lifecycle
+        run: |
+          python src/build_hmgapi.py --hmgapi upstream-hmgapi --key "$RUNNER_TEMP/ci.key"
+          python tests/test_hmgapi.py --hmgapi upstream-hmgapi --classes "$RUNNER_TEMP/classes"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hmgapi-development-package-disposable-key
+          path: out/hmgapi/
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/hmgapi-v')
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: VysseCodes/HMG-API
+          ref: 180185de2c57afb2cca4858d0be7828e8f1051d6
+          path: upstream-hmgapi
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build with persistent release identity
+        env:
+          AUTHOR_PRIVATE: ${{ secrets.HMGAPI_SIGNING_KEY }}
+          AUTHOR_PUBLIC: ${{ secrets.HMGAPI_SIGNING_PUBLIC_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          version = json.loads(Path('hmgapi/mod/mod.json').read_text())['version']
+          if os.environ['GITHUB_REF_NAME'] != 'hmgapi-v' + version:
+              raise SystemExit('Tag must match hmgapi/mod/mod.json version')
+          if not os.environ['AUTHOR_PRIVATE'] or not os.environ['AUTHOR_PUBLIC']:
+              raise SystemExit('Configure HMGAPI_SIGNING_KEY and HMGAPI_SIGNING_PUBLIC_KEY before releasing')
+          key = Path(os.environ['RUNNER_TEMP']) / 'author.key'
+          key.write_text(os.environ['AUTHOR_PRIVATE'].strip() + '\n')
+          key.chmod(0o600)
+          Path(str(key) + '.pub').write_text(os.environ['AUTHOR_PUBLIC'].strip() + '\n')
+          PY
+          python src/build_hmgapi.py --hmgapi upstream-hmgapi --key "$RUNNER_TEMP/author.key"
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" out/hmgapi/*.zip out/hmgapi/SHA256SUMS.txt --verify-tag --draft --title "Phone Assistant PTT for HMG-API $GITHUB_REF_NAME" --notes "HMG-API package only. See hmgapi/README.md for installation and compatibility."
+      - name: Remove temporary key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/author.key" "$RUNNER_TEMP/author.key.pub"

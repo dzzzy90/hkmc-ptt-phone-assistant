@@ -1,0 +1,12 @@
+{
+  "id": "ptt-phone-assistant",
+  "name": "Phone Assistant PTT",
+  "version": "1.0.0",
+  "hmgapi": ">=1.0.2",
+  "authors": ["Armando Dollia (personal HMG-API adaptation)"],
+  "license": "MIT",
+  "description": "Short press of the steering-wheel voice button sends the stock voice-button long press to activate the connected phone assistant. Physical long press keeps the car's normal behavior. Requires working HMG-API input hooks and a connected phone. Disable other voice-button remaps first.",
+  "input": [
+    {"key": "ptt", "press": "short", "stock": "replace", "send": "ptt hold"}
+  ]
+}
