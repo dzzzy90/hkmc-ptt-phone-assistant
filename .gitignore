@@ -5,3 +5,7 @@ __pycache__/
 *.dex
 *.apk
 *.jar
+out/
+upstream-hmgapi/
+*.key
+*.key.pub

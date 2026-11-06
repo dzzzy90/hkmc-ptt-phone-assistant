@@ -14,6 +14,11 @@ Only six file bytes change: the two-byte delay and four checksum bytes.
 
 ## Download
 
+For HMG-API users, an alternative declarative package and build instructions are
+in [hmgapi/README.md](hmgapi/README.md). It remaps a short press to the stock long
+press through HMG-API's input API; activation is on release. It requires working
+HMG-API input hooks and is tested off-car only. Choose one installation route.
+
 **[Download v0.1.0-alpha — installable ZIP](https://github.com/dzzzy90/hkmc-ptt-phone-assistant/releases/download/v0.1.0-alpha/hkmc-ptt-phone-assistant-0.1.0-alpha-release.zip)**
 
 Includes the installer, recovery USB files, and source. Read the compatibility and installation instructions below before installing.
